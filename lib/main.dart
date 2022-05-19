@@ -7,8 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sms_maintained/sms.dart';
 import 'package:tts_ble/blue.dart';
 import 'package:tts_ble/phone_number_widget.dart';
-import 'package:material_color_utilities/material_color_utilities.dart' ;
-import 'package:dynamic_color/dynamic_color.dart' ;
+import 'package:material_color_utilities/material_color_utilities.dart';
+// import 'package:dynamic_color/dynamic_color.dart';
 
 void main() {
   runApp(MyApp());
@@ -17,35 +17,35 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return dc.DynamicColorBuilder(builder: (a, b) {
-      return MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          // brightness: Brightness.dark,
-          canvasColor: Colors.white,
-          useMaterial3: true,
-          primarySwatch: ColorScheme.
-          // primarySwatch: a.primary == null
-          //     ? MaterialColor(0xFF93cd48, {
-          //         50: a.primary.withOpacity(.1),
-          //         100: a.primary.withOpacity(.2),
-          //         200: a.primary.withOpacity(.3),
-          //         300: a.primary.withOpacity(.4),
-          //         400: a.primary.withOpacity(.5),
-          //         500: a.primary.withOpacity(.6),
-          //         600: a.primary.withOpacity(.7),
-          //         700: a.primary.withOpacity(.8),
-          //         800: a.primary.withOpacity(.9),
-          //         900: a.primary.withOpacity(1),
-          //       })
-          //     : Colors.blue,
-          // primaryColor: a.primary,
-          // backgroundColor: a.background,
-        ),
-        debugShowCheckedModeBanner: false,
-        home: Home(),
-      );
-    });
+    // return dc.DynamicColorBuilder(builder: (a, b) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        // brightness: Brightness.dark,
+        canvasColor: Colors.white,
+        useMaterial3: true,
+        // primarySwatch: ColorScheme.
+        // primarySwatch: a.primary == null
+        //     ? MaterialColor(0xFF93cd48, {
+        //         50: a.primary.withOpacity(.1),
+        //         100: a.primary.withOpacity(.2),
+        //         200: a.primary.withOpacity(.3),
+        //         300: a.primary.withOpacity(.4),
+        //         400: a.primary.withOpacity(.5),
+        //         500: a.primary.withOpacity(.6),
+        //         600: a.primary.withOpacity(.7),
+        //         700: a.primary.withOpacity(.8),
+        //         800: a.primary.withOpacity(.9),
+        //         900: a.primary.withOpacity(1),
+        //       })
+        //     : Colors.blue,
+        // primaryColor: a.primary,
+        // backgroundColor: a.background,
+      ),
+      debugShowCheckedModeBanner: false,
+      home: Home(),
+    );
+    // });
   }
 }
 
@@ -104,6 +104,8 @@ class Home extends StatelessWidget {
               BluetoothApp(
                 controller: bluetoothController,
                 onMessage: (p0) async {
+         
+
                   print('printing from bt $p0');
                   if (p0 == 'R') {
                     tts.speak('obstacle at right');
@@ -116,6 +118,7 @@ class Home extends StatelessWidget {
                   } else {
                     tts.speak('negative');
                   }
+                  Future.delayed(Duration(seconds: 1));
                 },
               ),
               Padding(

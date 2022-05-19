@@ -81,7 +81,6 @@ class _BluetoothAppState extends State<BluetoothApp>
         getPairedDevices();
       });
     });
-    
   }
 
   @override
@@ -302,6 +301,8 @@ class _BluetoothAppState extends State<BluetoothApp>
               setState(() {
                 text = ascii.decode(data);
               });
+              Future.delayed(Duration(seconds: 2));
+              //TRY ADDING DURATION DELAY HERE...
             },
           ).onDone(() {
             if (isDisconnecting) {
