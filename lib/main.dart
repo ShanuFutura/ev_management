@@ -1,14 +1,14 @@
+import 'package:battery_indicator/battery_indicator.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter_sms/flutter_sms.dart';
-import 'package:flutter_tts/flutter_tts.dart';
+
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:location/location.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sms_maintained/sms.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
+
 import 'package:tts_ble/blue.dart';
-import 'package:tts_ble/phone_number_widget.dart';
+
 import 'package:material_color_utilities/material_color_utilities.dart';
-// import 'package:dynamic_color/dynamic_color.dart';
+import 'package:tts_ble/widgets/pin.dart';
+import 'package:tts_ble/widgets/progress_bar.dart';
 
 void main() {
   runApp(MyApp());
@@ -17,147 +17,176 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // return dc.DynamicColorBuilder(builder: (a, b) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // brightness: Brightness.dark,
         canvasColor: Colors.white,
         useMaterial3: true,
-        // primarySwatch: ColorScheme.
-        // primarySwatch: a.primary == null
-        //     ? MaterialColor(0xFF93cd48, {
-        //         50: a.primary.withOpacity(.1),
-        //         100: a.primary.withOpacity(.2),
-        //         200: a.primary.withOpacity(.3),
-        //         300: a.primary.withOpacity(.4),
-        //         400: a.primary.withOpacity(.5),
-        //         500: a.primary.withOpacity(.6),
-        //         600: a.primary.withOpacity(.7),
-        //         700: a.primary.withOpacity(.8),
-        //         800: a.primary.withOpacity(.9),
-        //         900: a.primary.withOpacity(1),
-        //       })
-        //     : Colors.blue,
-        // primaryColor: a.primary,
-        // backgroundColor: a.background,
       ),
       debugShowCheckedModeBanner: false,
       home: Home(),
     );
-    // });
   }
 }
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
   final phoneNumberController = TextEditingController();
+
   final sosMessageController = TextEditingController();
-  final FlutterTts tts = FlutterTts();
+
   final TextEditingController controller =
       TextEditingController(text: 'Hello world');
+
   BluetoothController bluetoothController = BluetoothController();
 
-  setSosMessage(String message, String target) async {
-    final spref = await SharedPreferences.getInstance();
-    spref.setString('targetNumber', target);
-    spref.setString('sosMessage', message);
-  }
-
-  sendSosMessage() async {
-    final spref = await SharedPreferences.getInstance();
-    final currentLoc = await Location.instance.getLocation();
-
-    tts.speak('sending emergency message');
-    SmsSender().sendSms(SmsMessage(
-        spref.getString('targetNumber') ?? '+919995395865',
-        'Im in trouble my location is https://www.google.co.in/maps/@${currentLoc.latitude},${currentLoc.longitude},14.15z ,'));
-    print(
-        'Im in trouble my location is ${currentLoc.latitude},${currentLoc.longitude}');
-  }
-
-  Home() {
-    print(tts.getLanguages);
-    tts.setLanguage('en');
-    tts.setSpeechRate(0.4);
-  }
-
-// speak(String data){
-// tts.speak(data);
-// }
-
+  bool isHidden = false;
+  String speed = '--';
+  bool isStart = false;
   @override
   Widget build(BuildContext context) {
+    final deviceWidth = MediaQuery.of(context).size.width;
+    final deviceHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor.withOpacity(.2),
-        title: Text('INS'),
+        title: Text('EV'),
       ),
-      body: Stack(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Image.asset(
-            'assets/bgimg.png',
-            // fit: BoxFit.fitWidth,
+          BluetoothApp(
+            controller: bluetoothController,
+            onMessage: (p0) async {
+              setState(() {
+                speed = p0;
+              });
+              print(p0);
+            },
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              BluetoothApp(
-                controller: bluetoothController,
-                onMessage: (p0) async {
-         
-
-                  print('printing from bt $p0');
-                  if (p0 == 'R') {
-                    tts.speak('obstacle at right');
-                  } else if (p0 == 'L') {
-                    tts.speak('obstacle at Left');
-                  } else if (p0 == 'F') {
-                    tts.speak('obstacle at Front');
-                  } else if (p0 == 'E') {
-                    sendSosMessage();
-                  } else {
-                    tts.speak('negative');
-                  }
-                  Future.delayed(Duration(seconds: 1));
-                },
+          Expanded(
+            child: Container(
+                child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: CircleAvatar(
+                          child: Text(
+                            '$speed Km/h',
+                            style: TextStyle(fontSize: deviceWidth * .03),
+                          ),
+                          radius: deviceWidth * .09,
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: () {
+                          if (isStart) {
+                            setState(() {
+                              isStart = false;
+                            });
+                            bluetoothController.sendMessage('T');
+                            Fluttertoast.showToast(msg: 'killed');
+                          } else {
+                            setState(() {
+                              isStart = true;
+                            });
+                            bluetoothController.sendMessage('S');
+                            Fluttertoast.showToast(msg: 'started');
+                          }
+                        },
+                        icon: Icon(
+                          isStart ? Icons.cancel : Icons.bolt,
+                          color: Colors.red,
+                          // Theme.of(context).primaryColor,
+                          size: 50,
+                        ),
+                        label: Text(isStart ? 'Kill' : 'Start'),
+                      ),
+                    ],
+                  ),
+                  Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: (deviceWidth / 2) - 20,
+                        backgroundImage: AssetImage('assets/sc.png'),
+                      ),
+                      Pin(
+                        pinName: 'A',
+                          fromLeft: 80,
+                          fromTop: 70,
+                          onThodal: () {
+                            bluetoothController.sendMessage('80');
+                            // print('thottu1');
+                          }),
+                      Pin(
+                        pinName: 'B',
+                        fromLeft: 190,
+                        fromTop: 180,
+                        onThodal: () {
+                            bluetoothController.sendMessage('40');
+                          // print('thottu');
+                        },
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CircularPercentIndicator(
+                          radius: 40.0,
+                          lineWidth: 5.0,
+                          percent: .75,
+                          center: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('Primary'),
+                              Text("75%"),
+                            ],
+                          ),
+                          progressColor: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CircularPercentIndicator(
+                          radius: 40.0,
+                          lineWidth: 5.0,
+                          percent: .75,
+                          center: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('Emergency'),
+                              Text("75%"),
+                            ],
+                          ),
+                          progressColor: Theme.of(context).primaryColor,
+                        ),
+                      )
+                    ],
+                  ),
+                  Text(
+                    'Distance progress',
+                    style: TextStyle(color: Theme.of(context).primaryColor),
+                  ),
+                  ProgressBar(progress: .5),
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: PhoneNumberField(
-                    phoneNumberController: phoneNumberController),
-              ),
-              // TextField(
-              //   controller: controller,
-              // ),
-              ElevatedButton(
-                  onPressed: () {
-                    // sendSMS(message: 'test message', recipients: ['+919947500227'])
-                    //     .onError((error, stackTrace) => '$error')
-                    //     .whenComplete(() => print('completed'))
-                    //     .then((value) => print('$value done'));
-                    // tts.speak(controller.text);
-                    SharedPreferences.getInstance()
-                        .then((value) => value.setString('targetNumber',
-                            '+91${phoneNumberController.text.trim()}'))
-                        .then((value) =>
-                            Fluttertoast.showToast(msg: 'number saved'));
-                  },
-                  child: Text('Save number')),
-              SizedBox(
-                height: 20,
-              ),
-            ],
+            )),
           ),
         ],
       ),
-      // floatingActionButton: dc.DynamicColorBuilder(builder: (a, b) {
-      //   return FloatingActionButton(
-      //     onPressed: () {
-      //       print(a.primary);
-      //     },
-      //     backgroundColor: a.primary,
-      //   );
-      // }),
     );
   }
 }

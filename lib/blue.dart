@@ -11,9 +11,11 @@ class BluetoothController {
 }
 
 class BluetoothApp extends StatefulWidget {
+
   final BluetoothController controller;
   final Function(String) onMessage;
-  BluetoothApp({this.controller, this.onMessage});
+  
+  BluetoothApp({ this.controller, this.onMessage});
   @override
   _BluetoothAppState createState() => _BluetoothAppState(controller);
 }
@@ -21,6 +23,7 @@ class BluetoothApp extends StatefulWidget {
 class _BluetoothAppState extends State<BluetoothApp>
     with TickerProviderStateMixin {
   String text = "from bluetooth";
+  
 
   _BluetoothAppState(BluetoothController _controller) {
     _controller.sendMessage = sendMessage;
