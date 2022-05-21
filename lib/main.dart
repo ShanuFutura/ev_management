@@ -20,6 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
+        // brightness: Brightness.dark,
         canvasColor: Colors.white,
         useMaterial3: true,
       ),
@@ -55,6 +56,20 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor.withOpacity(.2),
         title: Text('EV'),
+        actions: [
+          // IconButton(
+          //   onPressed: () {
+          //     showDialog(
+          //         context: context,
+          //         builder: (context) {
+          //           return AlertDialog(
+          //               content: Container(w),
+          //               );
+          //         });
+          //   },
+          //   icon: Icon(Icons.bluetooth),
+          // )
+        ],
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -82,8 +97,8 @@ class _HomeState extends State<Home> {
                         padding: const EdgeInsets.all(10),
                         child: CircleAvatar(
                           child: Text(
-                            '$speed Km/h',
-                            style: TextStyle(fontSize: deviceWidth * .03),
+                            '$speed Km',
+                            style: TextStyle(fontSize: deviceWidth * .04),
                           ),
                           radius: deviceWidth * .09,
                         ),
@@ -95,13 +110,13 @@ class _HomeState extends State<Home> {
                               isStart = false;
                             });
                             bluetoothController.sendMessage('T');
-                            Fluttertoast.showToast(msg: 'killed');
+                            Fluttertoast.showToast(msg: 'engine killed');
                           } else {
                             setState(() {
                               isStart = true;
                             });
                             bluetoothController.sendMessage('S');
-                            Fluttertoast.showToast(msg: 'started');
+                            Fluttertoast.showToast(msg: 'engine started');
                           }
                         },
                         icon: Icon(
@@ -115,16 +130,23 @@ class _HomeState extends State<Home> {
                     ],
                   ),
                   Stack(
+                    alignment: Alignment.center,
                     children: [
                       CircleAvatar(
-                        radius: (deviceWidth / 2) - 20,
+                        backgroundColor: Theme.of(context).primaryColorLight,
+                        radius: (deviceWidth / 2) - 27,
+                      ),
+                      CircleAvatar(
+                        radius: (deviceWidth / 2) - 30,
                         backgroundImage: AssetImage('assets/sc.png'),
                       ),
                       Pin(
-                        pinName: 'A',
+                          pinName: 'A',
                           fromLeft: 80,
                           fromTop: 70,
                           onThodal: () {
+                            Fluttertoast.showToast(
+                                msg: 'Destination changed to A');
                             bluetoothController.sendMessage('80');
                             // print('thottu1');
                           }),
@@ -133,7 +155,9 @@ class _HomeState extends State<Home> {
                         fromLeft: 190,
                         fromTop: 180,
                         onThodal: () {
-                            bluetoothController.sendMessage('40');
+                          Fluttertoast.showToast(
+                              msg: 'Destination changed to B');
+                          bluetoothController.sendMessage('40');
                           // print('thottu');
                         },
                       ),

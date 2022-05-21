@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:flutter/material.dart';
 
 class Pin extends StatelessWidget {
@@ -28,7 +26,16 @@ class Pin extends StatelessWidget {
               'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Google_Maps_pin.svg/585px-Google_Maps_pin.svg.png',
               height: 40,
               width: 30,
-            ),Text(pinName),
+            ),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  pinName,
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ),
           ],
         ),
       ),
