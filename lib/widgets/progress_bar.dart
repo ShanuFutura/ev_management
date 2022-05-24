@@ -24,7 +24,8 @@ class ProgressBar extends StatelessWidget {
             height: 10,
             width: deviceWidth - 40,
           ),
-          Container(
+          AnimatedContainer(
+            duration: Duration(milliseconds: 200),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               color: Theme.of(context).primaryColor,

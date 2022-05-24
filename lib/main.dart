@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 import 'package:tts_ble/blue.dart';
 
 import 'package:material_color_utilities/material_color_utilities.dart';
 import 'package:tts_ble/widgets/pin.dart';
 import 'package:tts_ble/widgets/progress_bar.dart';
+// import 'package:tts_ble/widgets/speedo_meter.dart';
 
 void main() {
   runApp(MyApp());
@@ -46,14 +48,17 @@ class _HomeState extends State<Home> {
   BluetoothController bluetoothController = BluetoothController();
 
   bool isHidden = false;
-  String speed = '--';
+  String speed = '0.0';
   bool isStart = false;
   var chargePrimary = '0';
   var chargeSecondary = '0';
+  var time = 0.0;
+  var distance = 0.0;
+
   @override
   Widget build(BuildContext context) {
     final deviceWidth = MediaQuery.of(context).size.width;
-    final deviceHeight = MediaQuery.of(context).size.height;
+    // final deviceHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor.withOpacity(.2),
@@ -81,11 +86,13 @@ class _HomeState extends State<Home> {
             onMessage: (p0) async {
               final List<String> dataList = p0.split(',');
               // Fluttertoast.showToast(msg: dataList.toString());
-              setState(() {
-                speed = dataList[0].toString();
-                chargePrimary = dataList[1].toString();
-                chargeSecondary = dataList[2].toString();
-              });
+              if (dataList.length > 3) {
+                setState(() {
+                  speed = dataList[0].toString();
+                  chargePrimary = dataList[1].toString();
+                  chargeSecondary = dataList[2].toString();
+                });
+              }
               if (dataList.length > 3) {}
               // print();
               print(
@@ -103,15 +110,14 @@ class _HomeState extends State<Home> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: CircleAvatar(
-                          child: Text(
-                            '$speed Km',
-                            style: TextStyle(fontSize: deviceWidth * .04),
-                          ),
-                          radius: deviceWidth * .09,
-                        ),
-                      ),
+                          padding: const EdgeInsets.all(10),
+                          child: CircleAvatar(
+                            child: Text(
+                              '$speed Km',
+                              style: TextStyle(fontSize: deviceWidth * .04),
+                            ),
+                            radius: deviceWidth * .09,
+                          )),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         child: TextButton.icon(
@@ -120,12 +126,16 @@ class _HomeState extends State<Home> {
                               setState(() {
                                 isStart = false;
                               });
+                              time = 0.0;
+                              distance = 0.0;
                               bluetoothController.sendMessage('T');
                               Fluttertoast.showToast(msg: 'engine killed');
                             } else {
                               setState(() {
                                 isStart = true;
                               });
+                              time = 0.0;
+                              distance = 0.0;
                               bluetoothController.sendMessage('S');
                               Fluttertoast.showToast(msg: 'engine started');
                             }
@@ -216,7 +226,18 @@ class _HomeState extends State<Home> {
                     'Distance progress',
                     style: TextStyle(color: Theme.of(context).primaryColor),
                   ),
-                  ProgressBar(progress: .5),
+                  StreamBuilder(
+                      stream: Stream.periodic(Duration(milliseconds: 1)),
+                      builder: (context, snap) {
+                        if (isStart) {
+                          time++;
+                          distance = distance +
+                              ((time * (double.parse(speed))) / 1000000);
+                        }
+
+                        print('distance: $distance, time: $time');
+                        return ProgressBar(progress: distance / 500);
+                      }),
                 ],
               ),
             )),

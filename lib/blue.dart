@@ -123,7 +123,8 @@ class _BluetoothAppState extends State<BluetoothApp>
     try {
       devices = await _bluetooth.getBondedDevices();
     } on PlatformException {
-      print("Error");
+      
+      ("Error");
     }
 
     // It is an error to call [setState] unless [mounted] is true.

@@ -38,6 +38,7 @@ dependencies:
   fluttertoast: ^8.0.9
   battery_indicator: ^0.1.1
   percent_indicator: ^4.2.2
+  syncfusion_flutter_gauges: ^20.1.57
   # sms_maintained: ^0.2.5
   # url_launcher: ^6.1.2
   # shared_preferences: ^2.0.15
