@@ -300,7 +300,7 @@ class _BluetoothAppState extends State<BluetoothApp>
           connection.input.listen(
             (Uint8List data) {
               widget.onMessage(ascii.decode(data));
-              print(ascii.decode(data));
+              // print(ascii.decode(data));
               setState(() {
                 text = ascii.decode(data);
               });

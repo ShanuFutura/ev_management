@@ -48,6 +48,8 @@ class _HomeState extends State<Home> {
   bool isHidden = false;
   String speed = '--';
   bool isStart = false;
+  var chargePrimary = '0';
+  var chargeSecondary = '0';
   @override
   Widget build(BuildContext context) {
     final deviceWidth = MediaQuery.of(context).size.width;
@@ -77,10 +79,17 @@ class _HomeState extends State<Home> {
           BluetoothApp(
             controller: bluetoothController,
             onMessage: (p0) async {
+              final List<String> dataList = p0.split(',');
+              // Fluttertoast.showToast(msg: dataList.toString());
               setState(() {
-                speed = p0;
+                speed = dataList[0].toString();
+                chargePrimary = dataList[1].toString();
+                chargeSecondary = dataList[2].toString();
               });
-              print(p0);
+              if (dataList.length > 3) {}
+              // print();
+              print(
+                  'speed : $speed, primary battery $chargePrimary, secondary battery $chargeSecondary');
             },
           ),
           Expanded(
@@ -103,29 +112,32 @@ class _HomeState extends State<Home> {
                           radius: deviceWidth * .09,
                         ),
                       ),
-                      TextButton.icon(
-                        onPressed: () {
-                          if (isStart) {
-                            setState(() {
-                              isStart = false;
-                            });
-                            bluetoothController.sendMessage('T');
-                            Fluttertoast.showToast(msg: 'engine killed');
-                          } else {
-                            setState(() {
-                              isStart = true;
-                            });
-                            bluetoothController.sendMessage('S');
-                            Fluttertoast.showToast(msg: 'engine started');
-                          }
-                        },
-                        icon: Icon(
-                          isStart ? Icons.cancel : Icons.bolt,
-                          color: Colors.red,
-                          // Theme.of(context).primaryColor,
-                          size: 50,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: TextButton.icon(
+                          onPressed: () {
+                            if (isStart) {
+                              setState(() {
+                                isStart = false;
+                              });
+                              bluetoothController.sendMessage('T');
+                              Fluttertoast.showToast(msg: 'engine killed');
+                            } else {
+                              setState(() {
+                                isStart = true;
+                              });
+                              bluetoothController.sendMessage('S');
+                              Fluttertoast.showToast(msg: 'engine started');
+                            }
+                          },
+                          icon: Icon(
+                            isStart ? Icons.cancel : Icons.bolt,
+                            color: Colors.red,
+                            // Theme.of(context).primaryColor,
+                            size: 50,
+                          ),
+                          label: Text(isStart ? 'Kill' : 'Start'),
                         ),
-                        label: Text(isStart ? 'Kill' : 'Start'),
                       ),
                     ],
                   ),
@@ -147,7 +159,7 @@ class _HomeState extends State<Home> {
                           onThodal: () {
                             Fluttertoast.showToast(
                                 msg: 'Destination changed to A');
-                            bluetoothController.sendMessage('80');
+                            bluetoothController.sendMessage('8');
                             // print('thottu1');
                           }),
                       Pin(
@@ -157,7 +169,7 @@ class _HomeState extends State<Home> {
                         onThodal: () {
                           Fluttertoast.showToast(
                               msg: 'Destination changed to B');
-                          bluetoothController.sendMessage('40');
+                          bluetoothController.sendMessage('4');
                           // print('thottu');
                         },
                       ),
@@ -171,12 +183,12 @@ class _HomeState extends State<Home> {
                         child: CircularPercentIndicator(
                           radius: 40.0,
                           lineWidth: 5.0,
-                          percent: .75,
+                          percent: double.parse('$chargePrimary') / 100,
                           center: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text('Primary'),
-                              Text("75%"),
+                              Text("$chargePrimary%"),
                             ],
                           ),
                           progressColor: Theme.of(context).primaryColor,
@@ -187,12 +199,12 @@ class _HomeState extends State<Home> {
                         child: CircularPercentIndicator(
                           radius: 40.0,
                           lineWidth: 5.0,
-                          percent: .75,
+                          percent: double.parse('$chargeSecondary') / 100,
                           center: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('Emergency'),
-                              Text("75%"),
+                              Text('Primary'),
+                              Text("$chargeSecondary%"),
                             ],
                           ),
                           progressColor: Theme.of(context).primaryColor,
