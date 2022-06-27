@@ -53,10 +53,21 @@ class _HomeState extends State<Home> {
   String chargePrimary = '0';
   String chargeSecondary = '0';
   double time = 0.0;
-  double distance = 0.0;
+  double distance = 0.1;
   bool isOnSecondary = false;
-  bool shownAlready=false;
-  double totalDistance = 0.0;
+  bool shownAlready = false;
+  double totalDistance = -0.1;
+
+  reset() {
+    setState(() {
+      isStart=false;
+      time = 0;
+      distance = 0;
+      isOnSecondary = false;
+      shownAlready = false;
+      totalDistance = 0;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,8 +104,8 @@ class _HomeState extends State<Home> {
                   speed = dataList[0].toString();
                   chargePrimary = dataList[1].toString();
                   chargeSecondary = dataList[2].toString();
-                  if (dataList[3].toString() == '1'&& !shownAlready) {
-                    shownAlready=true;
+                  if (dataList[3].toString() == '1' && !shownAlready) {
+                    shownAlready = true;
                     showDialog(
                         context: context,
                         builder: (context) {
@@ -164,6 +175,7 @@ class _HomeState extends State<Home> {
                             if (isStart) {
                               setState(() {
                                 isStart = false;
+                                isOnSecondary=false;
                               });
                               time = 0.0;
                               distance = 0.0;
@@ -281,6 +293,10 @@ class _HomeState extends State<Home> {
                   StreamBuilder(
                       stream: Stream.periodic(Duration(milliseconds: 1)),
                       builder: (context, snap) {
+                        if (distance == totalDistance) {
+                          // reset();
+                          // });
+                        }
                         if (isStart && isOnSecondary) {
                           time++;
                           distance = distance +
