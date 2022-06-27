@@ -50,10 +50,13 @@ class _HomeState extends State<Home> {
   bool isHidden = false;
   String speed = '0.0';
   bool isStart = false;
-  var chargePrimary = '0';
-  var chargeSecondary = '0';
-  var time = 0.0;
-  var distance = 0.0;
+  String chargePrimary = '0';
+  String chargeSecondary = '0';
+  double time = 0.0;
+  double distance = 0.0;
+  bool isOnSecondary = false;
+  bool shownAlready=false;
+  double totalDistance = 0.0;
 
   @override
   Widget build(BuildContext context) {
@@ -64,18 +67,17 @@ class _HomeState extends State<Home> {
         backgroundColor: Theme.of(context).primaryColor.withOpacity(.2),
         title: Text('EV'),
         actions: [
-          // IconButton(
-          //   onPressed: () {
-          //     showDialog(
-          //         context: context,
-          //         builder: (context) {
-          //           return AlertDialog(
-          //               content: Container(w),
-          //               );
-          //         });
-          //   },
-          //   icon: Icon(Icons.bluetooth),
-          // )
+          IconButton(
+            onPressed: () {
+              setState(() {
+                distance = 0.0;
+                time = 0.0;
+                isOnSecondary = false;
+                totalDistance = 0;
+              });
+            },
+            icon: Icon(Icons.restart_alt),
+          )
         ],
       ),
       body: Column(
@@ -91,9 +93,46 @@ class _HomeState extends State<Home> {
                   speed = dataList[0].toString();
                   chargePrimary = dataList[1].toString();
                   chargeSecondary = dataList[2].toString();
+                  if (dataList[3].toString() == '1'&& !shownAlready) {
+                    shownAlready=true;
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          bluetoothController.sendMessage('B');
+                          return AlertDialog(
+                              content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                onTap: () {
+                                  isOnSecondary = true;
+                                  totalDistance = 400;
+                                  Fluttertoast.showToast(
+                                      msg: 'Destination set to point A');
+                                },
+                                title: Text('Point A'),
+                                subtitle: Text('40 Kms'),
+                              ),
+                              ListTile(
+                                onTap: () {
+                                  isOnSecondary = true;
+                                  totalDistance = 800;
+                                  Fluttertoast.showToast(
+                                      msg: 'Destination set to point B');
+                                },
+                                title: Text('Point B'),
+                                subtitle: Text('80 Kms'),
+                              ),
+                            ],
+                          ));
+                        });
+
+                    // showModalBottomSheet(
+                    //     context: context, builder: (context) {});
+                  }
                 });
               }
-              if (dataList.length > 3) {}
+              // if (dataList.length > 3) {}
               // print();
               print(
                   'speed : $speed, primary battery $chargePrimary, secondary battery $chargeSecondary');
@@ -163,23 +202,29 @@ class _HomeState extends State<Home> {
                         backgroundImage: AssetImage('assets/sc.png'),
                       ),
                       Pin(
-                          pinName: 'A',
+                          kalar:
+                              totalDistance == 800 ? Colors.blue : Colors.white,
+                          pinName: '80Kms',
                           fromLeft: 80,
                           fromTop: 70,
                           onThodal: () {
-                            Fluttertoast.showToast(
-                                msg: 'Destination changed to A');
-                            bluetoothController.sendMessage('8');
-                            // print('thottu1');
+                            // totalDistance = 800;
+                            // Fluttertoast.showToast(
+                            //     msg: 'Destination changed to A');
+                            // bluetoothController.sendMessage('8');
+                            // // print('thottu1');
                           }),
                       Pin(
-                        pinName: 'B',
+                        kalar:
+                            totalDistance == 400 ? Colors.blue : Colors.white,
+                        pinName: '40Kms',
                         fromLeft: 190,
                         fromTop: 180,
                         onThodal: () {
-                          Fluttertoast.showToast(
-                              msg: 'Destination changed to B');
-                          bluetoothController.sendMessage('4');
+                          // totalDistance = 400;
+                          // Fluttertoast.showToast(
+                          //     msg: 'Destination changed to B');
+                          // bluetoothController.sendMessage('4');
                           // print('thottu');
                         },
                       ),
@@ -213,7 +258,7 @@ class _HomeState extends State<Home> {
                           center: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('Primary'),
+                              Text('EMGNC'),
                               Text("$chargeSecondary%"),
                             ],
                           ),
@@ -222,21 +267,30 @@ class _HomeState extends State<Home> {
                       )
                     ],
                   ),
-                  Text(
-                    'Distance progress',
-                    style: TextStyle(color: Theme.of(context).primaryColor),
-                  ),
+                  isOnSecondary
+                      ? Text(
+                          'Distance progress',
+                          style:
+                              TextStyle(color: Theme.of(context).primaryColor),
+                        )
+                      : Text(
+                          'Running on Primary battery',
+                          style:
+                              TextStyle(color: Theme.of(context).primaryColor),
+                        ),
                   StreamBuilder(
                       stream: Stream.periodic(Duration(milliseconds: 1)),
                       builder: (context, snap) {
-                        if (isStart) {
+                        if (isStart && isOnSecondary) {
                           time++;
                           distance = distance +
                               ((time * (double.parse(speed))) / 1000000);
                         }
 
                         print('distance: $distance, time: $time');
-                        return ProgressBar(progress: distance / 500);
+                        return isOnSecondary
+                            ? ProgressBar(progress: distance / totalDistance)
+                            : Container();
                       }),
                 ],
               ),
