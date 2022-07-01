@@ -1,0 +1,4 @@
+#Fri Jul 01 16:42:55 IST 2022
+base.0=D\:\\old downloads\\tts_ble-main\\build\\app\\intermediates\\dex\\release\\minifyReleaseWithR8\\classes.dex
+renamed.0=classes.dex
+path.0=classes.dex
