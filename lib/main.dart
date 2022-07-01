@@ -56,11 +56,11 @@ class _HomeState extends State<Home> {
   double distance = 0.1;
   bool isOnSecondary = false;
   bool shownAlready = false;
-  double totalDistance = -0.1;
+  double totalDistance = 0.1;
 
   reset() {
     setState(() {
-      isStart=false;
+      isStart = false;
       time = 0;
       distance = 0;
       isOnSecondary = false;
@@ -117,9 +117,10 @@ class _HomeState extends State<Home> {
                               ListTile(
                                 onTap: () {
                                   isOnSecondary = true;
-                                  totalDistance = 400;
+                                  totalDistance = 100;
                                   Fluttertoast.showToast(
                                       msg: 'Destination set to point A');
+                                  Navigator.pop(context);
                                 },
                                 title: Text('Point A'),
                                 subtitle: Text('40 Kms'),
@@ -175,7 +176,7 @@ class _HomeState extends State<Home> {
                             if (isStart) {
                               setState(() {
                                 isStart = false;
-                                isOnSecondary=false;
+                                isOnSecondary = false;
                               });
                               time = 0.0;
                               distance = 0.0;
@@ -293,9 +294,18 @@ class _HomeState extends State<Home> {
                   StreamBuilder(
                       stream: Stream.periodic(Duration(milliseconds: 1)),
                       builder: (context, snap) {
-                        if (distance == totalDistance) {
-                          // reset();
-                          // });
+                        if (isStart && distance >= totalDistance) {
+                          bluetoothController.sendMessage('T');
+                          bluetoothController.sendMessage('N');
+                          setState(() {
+                            isStart = false;
+                            isOnSecondary = false;
+                            time = 0.0;
+                            distance = 0.0;
+                            totalDistance = 0.1;
+                          });
+
+                          Fluttertoast.showToast(msg: 'engine killed');
                         }
                         if (isStart && isOnSecondary) {
                           time++;
